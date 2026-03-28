@@ -1,0 +1,10 @@
+origin_site,origin_url,title,creator_or_org,asset_type,keyword,license_type,commercial_ok,derivative_ok,attribution_text,allow_for_mvp,notes
+kogl.or.kr,https://www.kogl.or.kr/recommend/recommendDivView.do?oc=&recommendIdx=5802&division=img,보통학교 산술서 (普通學校 算術書),부평역사박물관,image,초등 수학,KOGL 1,yes,yes,출처표시 필요,yes,"검색어 초등 수학. 촬영기관: 부평역사박물관,한국문화정보원"
+kogl.or.kr,https://www.kogl.or.kr/recommend/recommendDivView.do?oc=&recommendIdx=63615&division=img,시그래프아시아2(2023 대구화보 P.87),대구광역시,image,그래프,KOGL 1,yes,yes,출처표시 필요,yes,검색어 그래프. 소장기관 기준 기록
+kogl.or.kr,https://www.kogl.or.kr/recommend/recommendDivView.do?oc=&recommendIdx=63614&division=img,시그래프아시아1(2023 대구화보 P.86),대구광역시,image,그래프,KOGL 1,yes,yes,출처표시 필요,yes,검색어 그래프. 소장기관 기준 기록
+kogl.or.kr,https://www.kogl.or.kr/recommend/recommendDivView.do?oc=&recommendIdx=85077&division=img,서문시장 제1지구,대구광역시 중구,image,지구,KOGL 2,no,yes,출처표시 + 비영리,no,검색어 지구. 유형 2는 상업 이용 불가
+kogl.or.kr,https://www.kogl.or.kr/recommend/recommendDivView.do?oc=&recommendIdx=84863&division=img,서초음악문화지구 안내지도 (2),서울특별시 서초구,image,지구,KOGL 4,no,no,출처표시 + 비영리 + 변경금지,no,검색어 지구. 유형 4는 상업 이용/변형 불가
+gongu.copyright.or.kr,https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=13221485&menuNo=200018,수학,한국저작권위원회,image,수학,CC BY,yes,yes,출처표시 필요,yes,detail hidden licenseCd=21
+gongu.copyright.or.kr,https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=13221875&menuNo=200018,과학수학,한국저작권위원회,image,수학,CC BY,yes,yes,출처표시 필요,yes,detail hidden licenseCd=21
+gongu.copyright.or.kr,https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=13049303&menuNo=200018,서울지도,임진훈,image,지도,CC BY,yes,yes,출처표시 필요,yes,detail hidden licenseCd=21
+gongu.copyright.or.kr,https://gongu.copyright.or.kr/gongu/wrt/wrt/view.do?wrtSn=13179727&menuNo=200018,태국 (667),신미식,image,지도,CC BY-NC,no,yes,"출처표시 필요, 비영리 한정",no,detail hidden licenseCd=24

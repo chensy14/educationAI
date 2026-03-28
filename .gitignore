@@ -1,0 +1,8 @@
+.next
+node_modules
+out
+*.log
+.vercel
+Deliverables
+tmp_ppt_test
+resources/**/downloads

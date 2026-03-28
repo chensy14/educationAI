@@ -1,0 +1,80 @@
+{
+  "generated_at": "2026-03-27T15:12:07.429422",
+  "base_folder": "/home/tjdgus/Downloads/edu_source_check_20260327_113100",
+  "sites": [
+    {
+      "site": "ncic",
+      "url": "https://ncic.re.kr/",
+      "public_access": true,
+      "login_required": false,
+      "evidence": [
+        "screenshots/01_ncic_home.png",
+        "screenshots/02_ncic_inventory.png",
+        "screenshots/03_ncic_subject_standard.png"
+      ],
+      "notes": "홈페이지 및 인벤토리 공개 접근 가능. 홈 인벤토리 카드에서 초등 국어/수학/영어/사회 성취기준 노출 확인. 코드 미노출."
+    },
+    {
+      "site": "edunet",
+      "url": "https://www.edunet.net/clssFlTbl/list/18",
+      "public_access": true,
+      "login_required": false,
+      "evidence": [
+        "screenshots/04_edunet_curriculum_list.png",
+        "screenshots/05_edunet_subject_ppt.png",
+        "screenshots/06_edunet_download_or_login.png",
+        "downloads/edunet_math_ppt_actual.zip"
+      ],
+      "notes": "2022 개정 교육과정 연수자료 목록 공개 접근 확인. 초등 수학 PPT 실제 zip 파일 다운로드 존재. 초등 국어 PPT는 목록 노출 확인(기존 스크린샷 기준), 별도 파일 저장은 미실시."
+    },
+    {
+      "site": "datago",
+      "url": "https://www.data.go.kr/data/3038852/fileData.do",
+      "public_access": true,
+      "login_required": false,
+      "evidence": [
+        "screenshots/07_datago_dataset_page.png",
+        "screenshots/08_datago_license_and_download.png",
+        "screenshots/09_datago_download_result.png",
+        "downloads/datago_textbook_catalog.csv"
+      ],
+      "notes": "공공데이터포털 파일데이터 페이지에서 CSV 형식, 다운로드 버튼, 이용허락범위 제한 없음 문구 확인. 실제 CSV 다운로드 파일 존재."
+    },
+    {
+      "site": "kogl",
+      "url": "https://www.kogl.or.kr/",
+      "public_access": true,
+      "login_required": false,
+      "evidence": [
+        "screenshots/10_kogl_search_results.png",
+        "screenshots/11_kogl_asset_detail_allowed.png",
+        "screenshots/12_kogl_asset_detail_blocked.png"
+      ],
+      "notes": "공공누리 유형 1 자산과 유형 2/4 자산 상세를 공개 HTML 기준으로 확인. 유형 0/1만 MVP 허용 대상으로 분류."
+    },
+    {
+      "site": "gongu",
+      "url": "https://gongu.copyright.or.kr/",
+      "public_access": true,
+      "login_required": false,
+      "evidence": [
+        "screenshots/13_gongu_search_results.png",
+        "screenshots/14_gongu_asset_detail_allowed.png",
+        "screenshots/15_gongu_asset_detail_blocked.png"
+      ],
+      "notes": "CC BY 자산 3건과 CC BY-NC 자산 1건 상세 라이선스 확인. CC BY만 MVP 허용 대상으로 분류."
+    },
+    {
+      "site": "stas",
+      "url": "https://stas.moe.go.kr/",
+      "public_access": "partial",
+      "login_required": true,
+      "evidence": [
+        "screenshots/16_stas_home_or_menu.png",
+        "screenshots/17_stas_menu_structure.png",
+        "screenshots/18_stas_access_result.png"
+      ],
+      "notes": "메뉴 구조는 공개 HTML에서 노출됨. 평가도구 및 자료 이용 흐름에서 로그인 안내 문구와 로그인 버튼 확인. 로그인 시도는 하지 않음."
+    }
+  ]
+}
