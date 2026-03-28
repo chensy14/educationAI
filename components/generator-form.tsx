@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 
 import { SUBJECT_OPTIONS, SUBJECTS_BY_GRADE, type Subject } from "@/lib/subjects";
 import type { UnitOption } from "@/lib/unit-options";
-import { buildSupportMessage, getPendingUnitOptions } from "@/lib/unit-options";
+import { getPendingUnitOptions } from "@/lib/unit-options";
 
 type LessonQuestion = {
   title: string;
@@ -74,7 +74,6 @@ export function GeneratorForm() {
   const [subject, setSubject] = useState<Subject>("수학");
   const [unit, setUnit] = useState("");
   const [unitOptions, setUnitOptions] = useState<UnitOption[]>(initialUnitOptions);
-  const [supportMessage, setSupportMessage] = useState(buildSupportMessage(initialUnitOptions));
   const [unitsLoading, setUnitsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<GenerateResponse | null>(null);
@@ -113,7 +112,6 @@ export function GeneratorForm() {
 
         const nextOptions = payload.options?.length ? payload.options : getPendingUnitOptions();
         setUnitOptions(nextOptions);
-        setSupportMessage(payload.supportMessage || buildSupportMessage(nextOptions));
 
         const firstEnabled = nextOptions.find((option) => !option.disabled);
         setUnit((current) =>
@@ -134,7 +132,6 @@ export function GeneratorForm() {
 
         const fallbackOptions = getPendingUnitOptions();
         setUnitOptions(fallbackOptions);
-        setSupportMessage(buildSupportMessage(fallbackOptions));
         setUnit("");
         setError("단원 목록을 불러오지 못했습니다.");
       } finally {
@@ -196,7 +193,7 @@ export function GeneratorForm() {
       <section className="hero-card">
         <div className="eyebrow">EducationAI Demo</div>
         <h1>개쩌는 Education AI</h1>
-        <p>수업용 PPT와 결과 요약 문서를 한 번에 만들어보세요.</p>
+        <p>수업용 ppt와 형성평가 문제를 한번에 만들어 보세요.</p>
       </section>
 
       <section className="content-grid">
@@ -239,12 +236,6 @@ export function GeneratorForm() {
               )}
             </select>
           </label>
-
-          <div className="support-box">
-            <strong>지원 상태</strong>
-            <p>{supportMessage}</p>
-            {selectedUnitOption?.note ? <p className="support-note">{selectedUnitOption.note}</p> : null}
-          </div>
 
           <button type="submit" disabled={isPending || !canGenerate || unitsLoading}>
             {isPending ? "생성 중..." : "결과물 만들기"}
@@ -370,7 +361,6 @@ export function GeneratorForm() {
           ) : (
             <div className="empty-state">
               <p>학년, 과목, 단원을 고른 뒤 결과물 만들기를 눌러 주세요.</p>
-              <p>현재 추천 조합은 4학년 수학 또는 2학년 국어입니다.</p>
             </div>
           )}
         </section>
