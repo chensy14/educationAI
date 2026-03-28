@@ -195,10 +195,7 @@ export function GeneratorForm() {
       <section className="hero-card">
         <div className="eyebrow">EducationAI Demo</div>
         <h1>학년과 과목에 맞는 주제를 고르면 바로 결과물을 생성하는 데모</h1>
-        <p>
-          지금 버전은 Supabase에 적재한 공개 리소스 기반 단원 목록을 읽어와서 드롭다운으로 보여주는 데모입니다.
-          지금은 템플릿 기반으로 결과물을 만들고, 다음 단계에서 AI 생성만 붙일 수 있게 구조를 먼저 정리했습니다.
-        </p>
+        <p>수업용 PPT와 결과 요약 문서를 한 번에 만들어보세요.</p>
       </section>
 
       <section className="content-grid">
@@ -312,8 +309,8 @@ export function GeneratorForm() {
             </div>
           ) : (
             <div className="empty-state">
-              <p>왼쪽에서 학년과 과목을 고르면 Supabase에 적재된 단원 목록을 불러옵니다.</p>
-              <p>현재 추천 조합은 `4학년 / 수학` 또는 `2학년 / 국어`입니다.</p>
+              <p>학년, 과목, 단원을 고른 뒤 결과물 만들기를 눌러 주세요.</p>
+              <p>현재 추천 조합은 4학년 수학 또는 2학년 국어입니다.</p>
             </div>
           )}
         </section>

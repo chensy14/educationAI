@@ -81,7 +81,7 @@ textarea {
   margin: 0;
   color: var(--muted);
   font-size: 1.05rem;
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .content-grid {
@@ -133,6 +133,7 @@ select:focus {
 }
 
 button {
+  width: 100%;
   border: 0;
   border-radius: 16px;
   padding: 14px 18px;
@@ -164,6 +165,11 @@ button:disabled {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.button-row button {
+  width: auto;
+  flex: 1 1 220px;
 }
 
 .result-stack {
@@ -272,5 +278,104 @@ button:disabled {
   .hero-card,
   .panel {
     border-radius: 22px;
+  }
+
+  .hero-card {
+    padding: 24px 20px 20px;
+    margin-bottom: 16px;
+  }
+
+  .hero-card h1 {
+    margin: 14px 0 8px;
+    font-size: clamp(1.65rem, 7vw, 2.3rem);
+    line-height: 1.15;
+  }
+
+  .hero-card p {
+    font-size: 0.96rem;
+    line-height: 1.55;
+  }
+
+  .panel {
+    padding: 20px 16px;
+  }
+
+  .panel h2 {
+    margin-bottom: 16px;
+    font-size: 1.15rem;
+  }
+
+  label {
+    gap: 6px;
+    font-size: 0.93rem;
+  }
+
+  input,
+  select,
+  button {
+    min-height: 48px;
+    padding: 13px 14px;
+  }
+
+  .button-row {
+    flex-direction: column;
+  }
+
+  .button-row button {
+    width: 100%;
+    flex: none;
+  }
+
+  .result-header h3 {
+    font-size: 1.2rem;
+    line-height: 1.3;
+  }
+
+  .result-card {
+    padding: 16px 14px;
+    border-radius: 16px;
+  }
+
+  .result-card p,
+  .result-card ul,
+  .empty-state,
+  .support-box p {
+    font-size: 0.94rem;
+    line-height: 1.6;
+  }
+
+  .trust-chip {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 520px) {
+  .page-shell {
+    padding: 16px 12px 28px;
+  }
+
+  .hero-card,
+  .panel {
+    border-radius: 18px;
+  }
+
+  .eyebrow {
+    padding: 7px 10px;
+    font-size: 11px;
+  }
+
+  .support-box,
+  .empty-state {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .result-stack {
+    gap: 12px;
+  }
+
+  .result-card ul {
+    padding-left: 16px;
   }
 }
