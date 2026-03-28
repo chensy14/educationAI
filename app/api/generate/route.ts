@@ -4,9 +4,7 @@ import { z } from "zod";
 import { generateLessonWithGemini } from "@/lib/ai/gemini";
 import { generateSlidesDeckWithSlidesGpt } from "@/lib/ai/slidesgpt";
 import type { AiLessonContent } from "@/lib/ai/types";
-import { generateLessonDeck, type Difficulty, type Purpose, type Subject } from "@/lib/lesson-generator";
-import { buildMarkdown } from "@/lib/markdown";
-import { buildPptxBuffer } from "@/lib/pptx";
+import { type Difficulty, type Purpose, type Subject } from "@/lib/lesson-generator";
 import { getLessonContext } from "@/lib/supabase/lesson-context";
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
 
@@ -35,45 +33,10 @@ export async function POST(request: Request) {
     const fileStem = slugify(`${parsed.grade}-${parsed.subject}-${parsed.unit || "lesson"}`);
     const context = await getLessonContext(parsed.grade, parsed.subject, parsed.unit);
 
-    let lessonContent: AiLessonContent;
-    let pptxBuffer: Buffer;
-    let pptSourcePath = `${fileStem}.pptx`;
-
-    try {
-      lessonContent = await generateLessonWithGemini(parsed, context);
-    } catch (geminiError) {
-      console.error("Gemini generation failed, using local fallback for markdown/content:", geminiError);
-      const fallbackDeck = generateLessonDeck(parsed);
-      fallbackDeck.trustNote = "Gemini 호출 실패로 템플릿 결과를 대신 제공";
-      lessonContent = {
-        title: fallbackDeck.title,
-        subtitle: fallbackDeck.subtitle,
-        trustNote: fallbackDeck.trustNote,
-        topicSummary: fallbackDeck.topicSummary,
-        goals: fallbackDeck.goals,
-        misconceptions: fallbackDeck.misconceptions,
-        feedback: fallbackDeck.feedback,
-        retryActivities: fallbackDeck.retryActivities,
-        rubric: fallbackDeck.rubric,
-        markdown: buildMarkdown(parsed, fallbackDeck),
-      };
-    }
-
-    try {
-      const slides = await generateSlidesDeckWithSlidesGpt(parsed, lessonContent, context);
-      pptxBuffer = slides.buffer;
-      pptSourcePath = `slidesgpt:${slides.presentation.id}`;
-    } catch (slidesError) {
-      console.error("SlidesGPT generation failed, using local fallback PPT:", slidesError);
-
-      const fallbackDeck = generateLessonDeck(parsed);
-      if (lessonContent.trustNote) {
-        fallbackDeck.trustNote = `${lessonContent.trustNote} / SlidesGPT 실패로 로컬 PPT 사용`;
-      } else {
-        fallbackDeck.trustNote = "SlidesGPT 실패로 로컬 PPT 사용";
-      }
-      pptxBuffer = await buildPptxBuffer(parsed, fallbackDeck);
-    }
+    const lessonContent: AiLessonContent = await generateLessonWithGemini(parsed, context);
+    const slides = await generateSlidesDeckWithSlidesGpt(parsed, lessonContent, context);
+    const pptxBuffer = slides.buffer;
+    const pptSourcePath = `slidesgpt:${slides.presentation.id}`;
 
     try {
       const supabase = createAdminSupabaseClient();
@@ -133,6 +96,24 @@ export async function POST(request: Request) {
         { ok: false, message: "입력값을 다시 확인해 주세요.", issues: error.flatten() },
         { status: 400 },
       );
+    }
+
+    if (error instanceof Error) {
+      const message = error.message;
+
+      if (message.includes("Gemini request failed")) {
+        return NextResponse.json(
+          { ok: false, message: "Gemini 생성이 실패했습니다. 잠시 후 다시 시도해 주세요." },
+          { status: 502 },
+        );
+      }
+
+      if (message.includes("SlidesGPT")) {
+        return NextResponse.json(
+          { ok: false, message: "SlidesGPT PPT 생성이 실패했습니다. 잠시 후 다시 시도해 주세요." },
+          { status: 502 },
+        );
+      }
     }
 
     console.error(error);

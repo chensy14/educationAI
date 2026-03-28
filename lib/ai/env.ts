@@ -9,7 +9,7 @@ function requireEnv(name: string, value: string | undefined): string {
 export function getAiEnv() {
   return {
     geminiApiKey: process.env.GEMINI_API_KEY,
-    geminiModel: process.env.GEMINI_MODEL || "gemini-3-flash-preview",
+    geminiModel: process.env.GEMINI_MODEL || "gemini-3.1-flash-lite-preview",
     slidesGptApiKey: process.env.SLIDESGPT_API_KEY,
   };
 }
