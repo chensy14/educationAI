@@ -6,8 +6,6 @@ import type { UnitOption } from "@/lib/unit-options";
 import { buildSupportMessage, getPendingUnitOptions } from "@/lib/unit-options";
 
 type Subject = "국어" | "수학" | "사회" | "과학" | "영어";
-type Purpose = "도입" | "형성평가" | "복습" | "재수업";
-type Difficulty = "쉬움" | "보통" | "도전";
 
 type Lesson = {
   title: string;
@@ -27,8 +25,6 @@ type GenerateResponse = {
     grade: string;
     subject: Subject;
     unit: string;
-    purpose: Purpose;
-    difficulty: Difficulty;
   };
   lesson: Lesson;
   files: {
@@ -54,8 +50,6 @@ type UnitsResponse =
 
 const gradeOptions = ["1학년", "2학년", "3학년", "4학년", "5학년", "6학년"];
 const subjectOptions: Subject[] = ["국어", "수학", "사회", "과학", "영어"];
-const purposeOptions: Purpose[] = ["도입", "형성평가", "복습", "재수업"];
-const difficultyOptions: Difficulty[] = ["쉬움", "보통", "도전"];
 const initialUnitOptions = getPendingUnitOptions();
 
 function downloadText(filename: string, content: string) {
@@ -85,8 +79,6 @@ export function GeneratorForm() {
   const [grade, setGrade] = useState("4학년");
   const [subject, setSubject] = useState<Subject>("수학");
   const [unit, setUnit] = useState("");
-  const [purpose, setPurpose] = useState<Purpose>("형성평가");
-  const [difficulty, setDifficulty] = useState<Difficulty>("보통");
   const [unitOptions, setUnitOptions] = useState<UnitOption[]>(initialUnitOptions);
   const [supportMessage, setSupportMessage] = useState(buildSupportMessage(initialUnitOptions));
   const [unitsLoading, setUnitsLoading] = useState(true);
@@ -178,8 +170,6 @@ export function GeneratorForm() {
             grade,
             subject,
             unit,
-            purpose,
-            difficulty,
           }),
         });
 
@@ -257,28 +247,6 @@ export function GeneratorForm() {
             <p>{supportMessage}</p>
             {selectedUnitOption?.note ? <p className="support-note">{selectedUnitOption.note}</p> : null}
           </div>
-
-          <label>
-            수업 목적
-            <select value={purpose} onChange={(event) => setPurpose(event.target.value as Purpose)}>
-              {purposeOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            난이도
-            <select value={difficulty} onChange={(event) => setDifficulty(event.target.value as Difficulty)}>
-              {difficultyOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </label>
 
           <button type="submit" disabled={isPending || !canGenerate || unitsLoading}>
             {isPending ? "생성 중..." : "결과물 만들기"}

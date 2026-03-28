@@ -12,8 +12,8 @@ const requestSchema = z.object({
   grade: z.string().min(1),
   subject: z.enum(["국어", "수학", "사회", "과학", "영어"] satisfies [Subject, ...Subject[]]),
   unit: z.string().min(1).max(80),
-  purpose: z.enum(["도입", "형성평가", "복습", "재수업"] satisfies [Purpose, ...Purpose[]]),
-  difficulty: z.enum(["쉬움", "보통", "도전"] satisfies [Difficulty, ...Difficulty[]]),
+  purpose: z.enum(["도입", "형성평가", "복습", "재수업"] satisfies [Purpose, ...Purpose[]]).default("형성평가"),
+  difficulty: z.enum(["쉬움", "보통", "도전"] satisfies [Difficulty, ...Difficulty[]]).default("보통"),
 });
 
 function slugify(value: string) {
