@@ -11,11 +11,27 @@ const lessonSchema = z.object({
   trustNote: z.string().optional().default("AI 생성 결과"),
   topicSummary: z.string().min(1),
   goals: z.array(z.string().min(1)).min(3).max(6),
+  questions: z
+    .array(
+      z.object({
+        title: z.string().min(1),
+        prompt: z.array(z.string().min(1)).min(1).max(4),
+        answer: z.array(z.string().min(1)).min(1).max(4),
+      }),
+    )
+    .length(5),
   misconceptions: z.array(z.string().min(1)).min(3).max(6),
   feedback: z.array(z.string().min(1)).min(3).max(6),
-  retryActivities: z.array(z.string().min(1)).min(2).max(4),
+  retryQuestions: z
+    .array(
+      z.object({
+        title: z.string().min(1),
+        prompt: z.array(z.string().min(1)).min(1).max(4),
+        answer: z.array(z.string().min(1)).min(1).max(4),
+      }),
+    )
+    .length(2),
   rubric: z.array(z.string().min(1)).min(3).max(4),
-  markdown: z.string().min(1),
 });
 
 function extractJson(text: string) {

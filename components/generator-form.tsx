@@ -7,15 +7,22 @@ import { buildSupportMessage, getPendingUnitOptions } from "@/lib/unit-options";
 
 type Subject = "국어" | "수학" | "사회" | "과학" | "영어";
 
+type LessonQuestion = {
+  title: string;
+  prompt: string[];
+  answer: string[];
+};
+
 type Lesson = {
   title: string;
   subtitle: string;
   trustNote?: string;
   topicSummary: string;
   goals: string[];
+  questions: LessonQuestion[];
   misconceptions: string[];
   feedback: string[];
-  retryActivities: string[];
+  retryQuestions: LessonQuestion[];
   rubric: string[];
 };
 
@@ -28,7 +35,6 @@ type GenerateResponse = {
   };
   lesson: Lesson;
   files: {
-    markdownFileName: string;
     markdown: string;
     pptxFileName: string;
     pptxBase64: string;
@@ -51,16 +57,6 @@ type UnitsResponse =
 const gradeOptions = ["1학년", "2학년", "3학년", "4학년", "5학년", "6학년"];
 const subjectOptions: Subject[] = ["국어", "수학", "사회", "과학", "영어"];
 const initialUnitOptions = getPendingUnitOptions();
-
-function downloadText(filename: string, content: string) {
-  const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
-}
 
 function downloadPptx(filename: string, base64: string) {
   const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
@@ -263,12 +259,9 @@ export function GeneratorForm() {
               </div>
 
               <div className="button-row">
-                <button type="button" onClick={() => downloadText(result.files.markdownFileName, result.files.markdown)}>
-                  MD 다운로드
-                </button>
                 <button
                   type="button"
-                  className="secondary-button"
+                  className="secondary-button button-single"
                   onClick={() => downloadPptx(result.files.pptxFileName, result.files.pptxBase64)}
                 >
                   PPTX 다운로드
@@ -290,6 +283,30 @@ export function GeneratorForm() {
               </div>
 
               <div className="result-card">
+                <h4>형성평가 5문항</h4>
+                <div className="question-stack">
+                  {result.lesson.questions.map((question) => (
+                    <article key={question.title} className="question-card">
+                      <h5>{question.title}</h5>
+                      <ul>
+                        {question.prompt.map((item) => (
+                          <li key={`${question.title}-prompt-${item}`}>{item}</li>
+                        ))}
+                      </ul>
+                      <div className="answer-block">
+                        <strong>정답·해설</strong>
+                        <ul>
+                          {question.answer.map((item) => (
+                            <li key={`${question.title}-answer-${item}`}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+
+              <div className="result-card">
                 <h4>예상 오개념</h4>
                 <ul>
                   {result.lesson.misconceptions.map((item) => (
@@ -305,6 +322,44 @@ export function GeneratorForm() {
                     <li key={item}>{item}</li>
                   ))}
                 </ul>
+              </div>
+
+              <div className="result-card">
+                <h4>재도전 문제</h4>
+                <div className="question-stack">
+                  {result.lesson.retryQuestions.map((question) => (
+                    <article key={question.title} className="question-card">
+                      <h5>{question.title}</h5>
+                      <ul>
+                        {question.prompt.map((item) => (
+                          <li key={`${question.title}-prompt-${item}`}>{item}</li>
+                        ))}
+                      </ul>
+                      <div className="answer-block">
+                        <strong>정답·해설</strong>
+                        <ul>
+                          {question.answer.map((item) => (
+                            <li key={`${question.title}-answer-${item}`}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+
+              <div className="result-card">
+                <h4>간단 평가 기준</h4>
+                <ul>
+                  {result.lesson.rubric.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="result-card">
+                <h4>결과 문서</h4>
+                <pre className="markdown-preview">{result.files.markdown}</pre>
               </div>
             </div>
           ) : (

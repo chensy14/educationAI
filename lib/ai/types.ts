@@ -1,14 +1,20 @@
+export type AiQuestion = {
+  title: string;
+  prompt: string[];
+  answer: string[];
+};
+
 export type AiLessonContent = {
   title: string;
   subtitle: string;
   trustNote?: string;
   topicSummary: string;
   goals: string[];
+  questions: AiQuestion[];
   misconceptions: string[];
   feedback: string[];
-  retryActivities: string[];
+  retryQuestions: AiQuestion[];
   rubric: string[];
-  markdown: string;
 };
 
 export type LessonContext = {

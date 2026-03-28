@@ -5,6 +5,7 @@ import { generateLessonWithGemini } from "@/lib/ai/gemini";
 import { generateSlidesDeckWithSlidesGpt } from "@/lib/ai/slidesgpt";
 import type { AiLessonContent } from "@/lib/ai/types";
 import { type Difficulty, type Purpose, type Subject } from "@/lib/lesson-generator";
+import { buildMarkdown } from "@/lib/markdown";
 import { getLessonContext } from "@/lib/supabase/lesson-context";
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
 
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
     const context = await getLessonContext(parsed.grade, parsed.subject, parsed.unit);
 
     const lessonContent: AiLessonContent = await generateLessonWithGemini(parsed, context);
+    const markdown = buildMarkdown(parsed, lessonContent);
     const slides = await generateSlidesDeckWithSlidesGpt(parsed, lessonContent, context);
     const pptxBuffer = slides.buffer;
     const pptSourcePath = `slidesgpt:${slides.presentation.id}`;
@@ -58,7 +60,7 @@ export async function POST(request: Request) {
 
       const { error: outputError } = await supabase.from("generation_outputs").insert({
         job_id: job.id,
-        markdown_content: lessonContent.markdown,
+        markdown_content: markdown,
         pptx_storage_path: pptSourcePath,
       });
 
@@ -78,14 +80,14 @@ export async function POST(request: Request) {
         trustNote: lessonContent.trustNote,
         topicSummary: lessonContent.topicSummary,
         goals: lessonContent.goals,
+        questions: lessonContent.questions,
         misconceptions: lessonContent.misconceptions,
         feedback: lessonContent.feedback,
-        retryActivities: lessonContent.retryActivities,
+        retryQuestions: lessonContent.retryQuestions,
         rubric: lessonContent.rubric,
       },
       files: {
-        markdownFileName: `${fileStem}.md`,
-        markdown: lessonContent.markdown,
+        markdown: markdown,
         pptxFileName: `${fileStem}.pptx`,
         pptxBase64: pptxBuffer.toString("base64"),
       },

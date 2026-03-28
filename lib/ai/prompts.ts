@@ -46,6 +46,9 @@ Requirements:
 - Avoid textbook copying.
 - Use the verified resource context when available.
 - If the resource context is weak, be honest in the trust note and keep claims modest.
+- Include exactly 5 formative assessment questions.
+- Include exactly 2 retry questions for students who need another try.
+- Each question must include short prompt bullets and short answer/explanation bullets.
 
 Return ONLY one JSON object with this exact shape:
 {
@@ -54,24 +57,24 @@ Return ONLY one JSON object with this exact shape:
   "trustNote": "string",
   "topicSummary": "string",
   "goals": ["string", "string", "string"],
+  "questions": [
+    {
+      "title": "string",
+      "prompt": ["string"],
+      "answer": ["string"]
+    }
+  ],
   "misconceptions": ["string", "string", "string"],
   "feedback": ["string", "string", "string"],
-  "retryActivities": ["string", "string"],
-  "rubric": ["string", "string", "string"],
-  "markdown": "full markdown document as a single string"
+  "retryQuestions": [
+    {
+      "title": "string",
+      "prompt": ["string"],
+      "answer": ["string"]
+    }
+  ],
+  "rubric": ["string", "string", "string"]
 }
-
-The markdown must start with a title heading and include only the result sections, using this structure:
-- # title
-- ## 5. 결과물
-- ### 5.1 수업 주제 요약
-- ### 5.2 학습 목표
-- ### 5.3 예상 오개념
-- ### 5.4 교사용 피드백 포인트
-- ### 5.5 재도전 활동
-- ### 5.6 간단 평가 기준
-
-Make the markdown teacher-friendly and polished.
 `.trim();
 }
 
