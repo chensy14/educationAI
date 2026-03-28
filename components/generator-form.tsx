@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+
+import { getSupportMessage, getUnitOptions } from "@/lib/unit-options";
 
 type Subject = "국어" | "수학" | "사회" | "과학" | "영어";
 type Purpose = "도입" | "형성평가" | "복습" | "재수업";
@@ -74,9 +76,26 @@ export function GeneratorForm() {
   const [result, setResult] = useState<GenerateResponse | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const unitOptions = useMemo(() => getUnitOptions(grade, subject), [grade, subject]);
+  const supportMessage = useMemo(() => getSupportMessage(grade, subject), [grade, subject]);
+  const selectedUnitOption = unitOptions.find((option) => option.value === unit);
+  const canGenerate = Boolean(unit.trim()) && !selectedUnitOption?.disabled;
+
+  useEffect(() => {
+    const fallback = unitOptions.find((option) => !option.disabled);
+    if (!unitOptions.some((option) => option.value === unit && !option.disabled)) {
+      setUnit(fallback?.value ?? "");
+    }
+  }, [grade, subject, unit, unitOptions]);
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+
+    if (!canGenerate) {
+      setError("현재 선택한 학년/과목 조합은 아직 생성 가능한 단원 데이터가 준비되지 않았습니다.");
+      return;
+    }
 
     startTransition(async () => {
       try {
@@ -115,16 +134,17 @@ export function GeneratorForm() {
     <div className="page-shell">
       <section className="hero-card">
         <div className="eyebrow">EducationAI Demo</div>
-        <h1>학년·과목·단원을 선택하면 바로 수업 결과물을 생성하는 데모</h1>
+        <h1>학년과 과목에 맞는 주제를 고르면 바로 결과물을 생성하는 데모</h1>
         <p>
-          지금 버전은 AI 없이도 돌아가는 템플릿 생성형 MVP입니다. 입력값을 제출하면 결과물 요약 화면과 함께
-          마크다운 파일과 PPTX 파일을 내려받을 수 있습니다.
+          지금 버전은 공개 리소스에서 확인한 주제와 내부 샘플 주제를 드롭다운으로 보여주는 데모입니다. 단원
+          자유입력 대신 선택형으로 바꿔, 제품처럼 보이도록 정리했습니다.
         </p>
       </section>
 
       <section className="content-grid">
         <form className="panel" onSubmit={handleSubmit}>
           <h2>입력</h2>
+
           <label>
             학년
             <select value={grade} onChange={(event) => setGrade(event.target.value)}>
@@ -138,20 +158,7 @@ export function GeneratorForm() {
 
           <label>
             과목
-            <select
-              value={subject}
-              onChange={(event) => {
-                const nextSubject = event.target.value as Subject;
-                setSubject(nextSubject);
-                if (nextSubject === "수학") {
-                  setUnit("평면에서 점의 이동");
-                } else if (nextSubject === "국어") {
-                  setUnit("겪은 일을 순서대로 말하고 쓰기");
-                } else {
-                  setUnit("");
-                }
-              }}
-            >
+            <select value={subject} onChange={(event) => setSubject(event.target.value as Subject)}>
               {subjectOptions.map((option) => (
                 <option key={option} value={option}>
                   {option}
@@ -162,8 +169,20 @@ export function GeneratorForm() {
 
           <label>
             단원 또는 주제
-            <input value={unit} onChange={(event) => setUnit(event.target.value)} placeholder="예: 평면에서 점의 이동" />
+            <select value={unit} onChange={(event) => setUnit(event.target.value)}>
+              {unitOptions.map((option) => (
+                <option key={`${grade}-${subject}-${option.label}`} value={option.value} disabled={option.disabled}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </label>
+
+          <div className="support-box">
+            <strong>지원 상태</strong>
+            <p>{supportMessage}</p>
+            {selectedUnitOption?.note ? <p className="support-note">{selectedUnitOption.note}</p> : null}
+          </div>
 
           <label>
             수업 목적
@@ -187,7 +206,7 @@ export function GeneratorForm() {
             </select>
           </label>
 
-          <button type="submit" disabled={isPending || !unit.trim()}>
+          <button type="submit" disabled={isPending || !canGenerate}>
             {isPending ? "생성 중..." : "결과물 만들기"}
           </button>
 
@@ -247,8 +266,8 @@ export function GeneratorForm() {
             </div>
           ) : (
             <div className="empty-state">
-              <p>왼쪽에서 학년, 과목, 단원을 선택한 뒤 생성 버튼을 눌러 주세요.</p>
-              <p>예시 입력: `4학년 / 수학 / 평면에서 점의 이동` 또는 `2학년 / 국어 / 겪은 일을 순서대로 말하고 쓰기`</p>
+              <p>왼쪽에서 학년과 과목을 고르면 해당 조합에 맞는 주제 드롭다운이 바뀝니다.</p>
+              <p>현재 추천 조합은 `4학년 / 수학` 또는 `2학년 / 국어`입니다.</p>
             </div>
           )}
         </section>
