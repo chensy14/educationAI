@@ -4,6 +4,7 @@ import { z } from "zod";
 import { generateLessonDeck, type Difficulty, type Purpose, type Subject } from "@/lib/lesson-generator";
 import { buildMarkdown } from "@/lib/markdown";
 import { buildPptxBuffer } from "@/lib/pptx";
+import { createAdminSupabaseClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
@@ -30,6 +31,37 @@ export async function POST(request: Request) {
     const markdown = buildMarkdown(parsed, deck);
     const pptxBuffer = await buildPptxBuffer(parsed, deck);
     const fileStem = slugify(`${parsed.grade}-${parsed.subject}-${parsed.unit || "lesson"}`);
+
+    try {
+      const supabase = createAdminSupabaseClient();
+      const { data: job, error: jobError } = await supabase
+        .from("generation_jobs")
+        .insert({
+          grade: parsed.grade,
+          subject: parsed.subject,
+          unit_title: parsed.unit,
+          purpose: parsed.purpose,
+          difficulty: parsed.difficulty,
+        })
+        .select("id")
+        .single();
+
+      if (jobError) {
+        throw jobError;
+      }
+
+      const { error: outputError } = await supabase.from("generation_outputs").insert({
+        job_id: job.id,
+        markdown_content: markdown,
+        pptx_storage_path: `${fileStem}.pptx`,
+      });
+
+      if (outputError) {
+        throw outputError;
+      }
+    } catch (storageError) {
+      console.error("Failed to persist generation result:", storageError);
+    }
 
     return NextResponse.json({
       ok: true,

@@ -6,3 +6,6 @@ out
 Deliverables
 tmp_ppt_test
 resources/**/downloads
+.env
+.env.local
+.env.*.local
