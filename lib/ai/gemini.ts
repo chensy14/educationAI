@@ -50,10 +50,43 @@ function extractJson(text: string) {
   return text.trim();
 }
 
-export async function generateLessonWithGemini(input: GenerationInput, context: LessonContext): Promise<AiLessonContent> {
-  const { apiKey, model } = requireGeminiEnv();
-  const prompt = buildGeminiLessonPrompt(input, context);
+function normalizeText(value: string) {
+  return value.replace(/\s+/g, "").toLowerCase();
+}
 
+function getUnitKeywords(unit: string) {
+  return unit
+    .split(/[,\-/·()]/)
+    .flatMap((part) => part.split(/\s+/))
+    .map((part) => part.trim())
+    .filter((part) => part.length >= 2)
+    .slice(0, 6);
+}
+
+function lessonMatchesInput(input: GenerationInput, lesson: AiLessonContent) {
+  const haystack = normalizeText(
+    [
+      lesson.title,
+      lesson.subtitle,
+      lesson.topicSummary,
+      ...lesson.goals,
+      ...lesson.questions.flatMap((question) => [...question.prompt, ...question.answer]),
+      ...lesson.retryQuestions.flatMap((question) => [...question.prompt, ...question.answer]),
+    ].join(" "),
+  );
+
+  const normalizedSubject = normalizeText(input.subject);
+  const normalizedGrade = normalizeText(input.grade);
+  const unitKeywords = getUnitKeywords(input.unit).map(normalizeText);
+
+  const subjectMatches = haystack.includes(normalizedSubject);
+  const gradeMatches = haystack.includes(normalizedGrade) || haystack.includes(normalizeText(input.unit));
+  const unitMatches = unitKeywords.some((keyword) => haystack.includes(keyword));
+
+  return subjectMatches && gradeMatches && unitMatches;
+}
+
+async function requestLesson(apiKey: string, model: string, prompt: string) {
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
     method: "POST",
     headers: {
@@ -97,4 +130,23 @@ export async function generateLessonWithGemini(input: GenerationInput, context: 
   const parsed = lessonSchema.parse(JSON.parse(extractJson(rawText)));
 
   return parsed;
+}
+
+export async function generateLessonWithGemini(input: GenerationInput, context: LessonContext): Promise<AiLessonContent> {
+  const { apiKey, model } = requireGeminiEnv();
+  const basePrompt = buildGeminiLessonPrompt(input, context);
+
+  const firstAttempt = await requestLesson(apiKey, model, basePrompt);
+  if (lessonMatchesInput(input, firstAttempt)) {
+    return firstAttempt;
+  }
+
+  const retryPrompt = `${basePrompt}\n\nCritical correction:\nYour previous response may have drifted to a different unit or subject. Regenerate the JSON and stay strictly on ${input.grade} ${input.subject} - ${input.unit}.`;
+  const secondAttempt = await requestLesson(apiKey, model, retryPrompt);
+
+  if (!lessonMatchesInput(input, secondAttempt)) {
+    throw new Error("Gemini topic mismatch: generated content drifted away from the selected unit.");
+  }
+
+  return secondAttempt;
 }

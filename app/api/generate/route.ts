@@ -117,6 +117,13 @@ export async function POST(request: Request) {
         );
       }
 
+      if (message.includes("Gemini topic mismatch")) {
+        return NextResponse.json(
+          { ok: false, message: "선택한 단원과 맞지 않는 AI 응답이 생성되어 다시 시도해 주세요." },
+          { status: 502 },
+        );
+      }
+
       if (message.includes("SlidesGPT")) {
         return NextResponse.json(
           { ok: false, message: "SlidesGPT PPT 생성이 실패했습니다. 잠시 후 다시 시도해 주세요." },

@@ -46,6 +46,9 @@ Requirements:
 - Avoid textbook copying.
 - Use the verified resource context when available.
 - If the resource context is weak, be honest in the trust note and keep claims modest.
+- The response must stay strictly on this exact grade, subject, and unit/topic.
+- Never switch to another subject, another grade, or another unit.
+- If you mention a different subject or unit, the response is invalid.
 - Include exactly 5 formative assessment questions.
 - Include exactly 2 retry questions for students who need another try.
 - Each question must include short prompt bullets and short answer/explanation bullets.
