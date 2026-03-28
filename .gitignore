@@ -5,6 +5,8 @@ out
 .vercel
 Deliverables
 tmp_ppt_test
+tmp_extract_math_ppt
+tmp_extract_math_ppt_xml
 resources/**/downloads
 .env
 .env.local

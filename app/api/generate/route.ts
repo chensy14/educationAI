@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { generateLessonWithGemini } from "@/lib/ai/gemini";
+import { generateSlidesDeckWithSlidesGpt } from "@/lib/ai/slidesgpt";
+import type { AiLessonContent } from "@/lib/ai/types";
 import { generateLessonDeck, type Difficulty, type Purpose, type Subject } from "@/lib/lesson-generator";
 import { buildMarkdown } from "@/lib/markdown";
 import { buildPptxBuffer } from "@/lib/pptx";
+import { getLessonContext } from "@/lib/supabase/lesson-context";
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
+export const maxDuration = 300;
 
 const requestSchema = z.object({
   grade: z.string().min(1),
@@ -27,10 +32,48 @@ function slugify(value: string) {
 export async function POST(request: Request) {
   try {
     const parsed = requestSchema.parse(await request.json());
-    const deck = generateLessonDeck(parsed);
-    const markdown = buildMarkdown(parsed, deck);
-    const pptxBuffer = await buildPptxBuffer(parsed, deck);
     const fileStem = slugify(`${parsed.grade}-${parsed.subject}-${parsed.unit || "lesson"}`);
+    const context = await getLessonContext(parsed.grade, parsed.subject, parsed.unit);
+
+    let lessonContent: AiLessonContent;
+    let pptxBuffer: Buffer;
+    let pptSourcePath = `${fileStem}.pptx`;
+
+    try {
+      lessonContent = await generateLessonWithGemini(parsed, context);
+    } catch (geminiError) {
+      console.error("Gemini generation failed, using local fallback for markdown/content:", geminiError);
+      const fallbackDeck = generateLessonDeck(parsed);
+      fallbackDeck.trustNote = "Gemini 호출 실패로 템플릿 결과를 대신 제공";
+      lessonContent = {
+        title: fallbackDeck.title,
+        subtitle: fallbackDeck.subtitle,
+        trustNote: fallbackDeck.trustNote,
+        topicSummary: fallbackDeck.topicSummary,
+        goals: fallbackDeck.goals,
+        misconceptions: fallbackDeck.misconceptions,
+        feedback: fallbackDeck.feedback,
+        retryActivities: fallbackDeck.retryActivities,
+        rubric: fallbackDeck.rubric,
+        markdown: buildMarkdown(parsed, fallbackDeck),
+      };
+    }
+
+    try {
+      const slides = await generateSlidesDeckWithSlidesGpt(parsed, lessonContent, context);
+      pptxBuffer = slides.buffer;
+      pptSourcePath = `slidesgpt:${slides.presentation.id}`;
+    } catch (slidesError) {
+      console.error("SlidesGPT generation failed, using local fallback PPT:", slidesError);
+
+      const fallbackDeck = generateLessonDeck(parsed);
+      if (lessonContent.trustNote) {
+        fallbackDeck.trustNote = `${lessonContent.trustNote} / SlidesGPT 실패로 로컬 PPT 사용`;
+      } else {
+        fallbackDeck.trustNote = "SlidesGPT 실패로 로컬 PPT 사용";
+      }
+      pptxBuffer = await buildPptxBuffer(parsed, fallbackDeck);
+    }
 
     try {
       const supabase = createAdminSupabaseClient();
@@ -52,8 +95,8 @@ export async function POST(request: Request) {
 
       const { error: outputError } = await supabase.from("generation_outputs").insert({
         job_id: job.id,
-        markdown_content: markdown,
-        pptx_storage_path: `${fileStem}.pptx`,
+        markdown_content: lessonContent.markdown,
+        pptx_storage_path: pptSourcePath,
       });
 
       if (outputError) {
@@ -66,10 +109,20 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       input: parsed,
-      lesson: deck,
+      lesson: {
+        title: lessonContent.title,
+        subtitle: lessonContent.subtitle,
+        trustNote: lessonContent.trustNote,
+        topicSummary: lessonContent.topicSummary,
+        goals: lessonContent.goals,
+        misconceptions: lessonContent.misconceptions,
+        feedback: lessonContent.feedback,
+        retryActivities: lessonContent.retryActivities,
+        rubric: lessonContent.rubric,
+      },
       files: {
         markdownFileName: `${fileStem}.md`,
-        markdown,
+        markdown: lessonContent.markdown,
         pptxFileName: `${fileStem}.pptx`,
         pptxBase64: pptxBuffer.toString("base64"),
       },
