@@ -195,7 +195,7 @@ export function GeneratorForm() {
     <div className="page-shell">
       <section className="hero-card">
         <div className="eyebrow">EducationAI Demo</div>
-        <h1>학년과 과목에 맞는 주제를 고르면 바로 결과물을 생성하는 데모</h1>
+        <h1>개쩌는 Education AI</h1>
         <p>수업용 PPT와 결과 요약 문서를 한 번에 만들어보세요.</p>
       </section>
 
