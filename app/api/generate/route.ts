@@ -101,6 +101,13 @@ export async function POST(request: Request) {
     if (error instanceof Error) {
       const message = error.message;
 
+      if (message.includes("is not set")) {
+        return NextResponse.json(
+          { ok: false, message: "배포 환경변수가 설정되지 않았습니다. Vercel 환경변수를 다시 확인해 주세요." },
+          { status: 500 },
+        );
+      }
+
       if (message.includes("Gemini request failed")) {
         return NextResponse.json(
           { ok: false, message: "Gemini 생성이 실패했습니다. 잠시 후 다시 시도해 주세요." },
@@ -111,6 +118,13 @@ export async function POST(request: Request) {
       if (message.includes("SlidesGPT")) {
         return NextResponse.json(
           { ok: false, message: "SlidesGPT PPT 생성이 실패했습니다. 잠시 후 다시 시도해 주세요." },
+          { status: 502 },
+        );
+      }
+
+      if (message.includes("fetch failed")) {
+        return NextResponse.json(
+          { ok: false, message: "외부 AI 서비스 연결에 실패했습니다. 잠시 후 다시 시도해 주세요." },
           { status: 502 },
         );
       }
