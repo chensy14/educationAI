@@ -1,4 +1,5 @@
-export type Subject = "국어" | "수학" | "사회" | "과학" | "영어";
+import type { Subject } from "@/lib/subjects";
+
 export type Difficulty = "쉬움" | "보통" | "도전";
 export type Purpose = "도입" | "형성평가" | "복습" | "재수업";
 
@@ -36,11 +37,17 @@ export type LessonDeck = {
 };
 
 const subjectPalette: Record<Subject, { bandRgb: string; accentRgb: string }> = {
+  통합교과: { bandRgb: "F59E0B", accentRgb: "16A34A" },
   국어: { bandRgb: "5F8F00", accentRgb: "1D4ED8" },
   수학: { bandRgb: "D9480F", accentRgb: "0284C7" },
   사회: { bandRgb: "7C3AED", accentRgb: "F59E0B" },
   과학: { bandRgb: "047857", accentRgb: "0EA5E9" },
   영어: { bandRgb: "1D4ED8", accentRgb: "DB2777" },
+  도덕: { bandRgb: "7C3AED", accentRgb: "16A34A" },
+  실과: { bandRgb: "B45309", accentRgb: "2563EB" },
+  체육: { bandRgb: "15803D", accentRgb: "D97706" },
+  음악: { bandRgb: "C026D3", accentRgb: "2563EB" },
+  미술: { bandRgb: "DC2626", accentRgb: "7C3AED" },
 };
 
 function createMathPointMovement(input: GenerationInput): LessonDeck {
@@ -184,11 +191,17 @@ function createKoreanSequence(input: GenerationInput): LessonDeck {
 function createGenericDeck(input: GenerationInput): LessonDeck {
   const unit = input.unit.trim() || "선택한 단원";
   const topicBySubject: Record<Subject, string> = {
+    통합교과: `${unit}와 관련된 생활 경험을 탐색하고 표현하는 활동`,
     국어: `${unit}와 관련된 핵심 표현을 말하고 쓰는 활동`,
     수학: `${unit}의 핵심 개념을 이해하고 적용하는 활동`,
     사회: `${unit}의 주요 내용을 살펴보고 설명하는 활동`,
     과학: `${unit}의 핵심 개념과 탐구 과정을 확인하는 활동`,
     영어: `${unit}와 관련된 핵심 표현을 듣고 말하는 활동`,
+    도덕: `${unit}를 통해 바람직한 태도와 실천을 생각해 보는 활동`,
+    실과: `${unit}와 관련된 생활 기술과 실천 방법을 익히는 활동`,
+    체육: `${unit}와 관련된 움직임과 건강한 참여 태도를 기르는 활동`,
+    음악: `${unit}와 관련된 소리와 표현을 경험하는 활동`,
+    미술: `${unit}와 관련된 감각과 표현 방법을 탐색하는 활동`,
   };
 
   return {

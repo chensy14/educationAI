@@ -4,17 +4,20 @@ import { z } from "zod";
 import { generateLessonWithGemini } from "@/lib/ai/gemini";
 import { generateSlidesDeckWithSlidesGpt } from "@/lib/ai/slidesgpt";
 import type { AiLessonContent } from "@/lib/ai/types";
-import { type Difficulty, type Purpose, type Subject } from "@/lib/lesson-generator";
+import { type Difficulty, type Purpose } from "@/lib/lesson-generator";
 import { buildMarkdown } from "@/lib/markdown";
+import { SUBJECT_OPTIONS, type Subject } from "@/lib/subjects";
 import { getLessonContext } from "@/lib/supabase/lesson-context";
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
+const subjectEnumOptions = [...SUBJECT_OPTIONS] as [Subject, ...Subject[]];
+
 const requestSchema = z.object({
   grade: z.string().min(1),
-  subject: z.enum(["국어", "수학", "사회", "과학", "영어"] satisfies [Subject, ...Subject[]]),
+  subject: z.enum(subjectEnumOptions),
   unit: z.string().min(1).max(80),
   purpose: z.enum(["도입", "형성평가", "복습", "재수업"] satisfies [Purpose, ...Purpose[]]).default("형성평가"),
   difficulty: z.enum(["쉬움", "보통", "도전"] satisfies [Difficulty, ...Difficulty[]]).default("보통"),

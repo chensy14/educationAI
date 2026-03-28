@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { SUBJECT_OPTIONS } from "@/lib/subjects";
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
 import { buildSupportMessage, getPendingUnitOptions, type UnitOption } from "@/lib/unit-options";
 
 export const runtime = "nodejs";
 
+const subjectEnumOptions = [...SUBJECT_OPTIONS] as [typeof SUBJECT_OPTIONS[number], ...typeof SUBJECT_OPTIONS[number][]];
+
 const querySchema = z.object({
   grade: z.string().min(1),
-  subject: z.enum(["국어", "수학", "사회", "과학", "영어"]),
+  subject: z.enum(subjectEnumOptions),
 });
 
 function buildSourceNote(sourceType: string, standardCode: string | null) {
@@ -17,7 +20,7 @@ function buildSourceNote(sourceType: string, standardCode: string | null) {
   }
 
   if (sourceType === "sample") {
-    return "리소스 존재 확인 기반 샘플 주제";
+    return "원본 다운로드 완료 기반 초기 큐레이션 샘플";
   }
 
   return undefined;

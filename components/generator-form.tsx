@@ -2,10 +2,9 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 
+import { SUBJECT_OPTIONS, SUBJECTS_BY_GRADE, type Subject } from "@/lib/subjects";
 import type { UnitOption } from "@/lib/unit-options";
 import { buildSupportMessage, getPendingUnitOptions } from "@/lib/unit-options";
-
-type Subject = "국어" | "수학" | "사회" | "과학" | "영어";
 
 type LessonQuestion = {
   title: string;
@@ -55,7 +54,6 @@ type UnitsResponse =
     };
 
 const gradeOptions = ["1학년", "2학년", "3학년", "4학년", "5학년", "6학년"];
-const subjectOptions: Subject[] = ["국어", "수학", "사회", "과학", "영어"];
 const initialUnitOptions = getPendingUnitOptions();
 
 function downloadPptx(filename: string, base64: string) {
@@ -86,7 +84,14 @@ export function GeneratorForm() {
     () => unitOptions.find((option) => option.value === unit),
     [unit, unitOptions],
   );
+  const subjectOptions = useMemo(() => SUBJECTS_BY_GRADE[grade] ?? [...SUBJECT_OPTIONS], [grade]);
   const canGenerate = Boolean(unit.trim()) && !selectedUnitOption?.disabled;
+
+  useEffect(() => {
+    if (!subjectOptions.includes(subject)) {
+      setSubject(subjectOptions[0] ?? SUBJECT_OPTIONS[0]);
+    }
+  }, [grade, subject, subjectOptions]);
 
   useEffect(() => {
     let isCancelled = false;
