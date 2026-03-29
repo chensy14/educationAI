@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireGeminiEnv } from "@/lib/ai/env";
 import type { AiLessonContent, LessonContext } from "@/lib/ai/types";
 import type { GenerationInput } from "@/lib/lesson-generator";
-import { buildGeminiLessonPrompt } from "@/lib/ai/prompts";
+import { buildGeminiHtmlDeckPrompt, buildGeminiLessonPrompt } from "@/lib/ai/prompts";
 
 const lessonSchema = z.object({
   title: z.string().min(1),
@@ -50,6 +50,44 @@ function extractJson(text: string) {
   return text.trim();
 }
 
+function extractHtml(text: string) {
+  const fenced = text.match(/```html\s*([\s\S]*?)```/i) || text.match(/```\s*([\s\S]*?)```/i);
+  if (fenced) {
+    return fenced[1].trim();
+  }
+
+  const doctypeIndex = text.search(/<!doctype html>/i);
+  if (doctypeIndex >= 0) {
+    return text.slice(doctypeIndex).trim();
+  }
+
+  const htmlIndex = text.search(/<html[\s>]/i);
+  if (htmlIndex >= 0) {
+    return text.slice(htmlIndex).trim();
+  }
+
+  return text.trim();
+}
+
+function ensureHtmlDocument(html: string, title: string) {
+  const trimmed = html.trim();
+  if (/<!doctype html>/i.test(trimmed) || /<html[\s>]/i.test(trimmed)) {
+    return trimmed;
+  }
+
+  return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${title}</title>
+</head>
+<body>
+${trimmed}
+</body>
+</html>`;
+}
+
 function normalizeText(value: string) {
   return value.replace(/\s+/g, "").toLowerCase();
 }
@@ -86,7 +124,7 @@ function lessonMatchesInput(input: GenerationInput, lesson: AiLessonContent) {
   return subjectMatches && gradeMatches && unitMatches;
 }
 
-async function requestLesson(apiKey: string, model: string, prompt: string) {
+async function requestGemini(apiKey: string, model: string, prompt: string, responseMimeType?: string) {
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
     method: "POST",
     headers: {
@@ -101,7 +139,7 @@ async function requestLesson(apiKey: string, model: string, prompt: string) {
       ],
       generationConfig: {
         temperature: 0.6,
-        responseMimeType: "application/json",
+        ...(responseMimeType ? { responseMimeType } : {}),
       },
     }),
   });
@@ -127,6 +165,12 @@ async function requestLesson(apiKey: string, model: string, prompt: string) {
     throw new Error("Gemini returned an empty response.");
   }
 
+  return rawText;
+}
+
+async function requestLesson(apiKey: string, model: string, prompt: string) {
+  const rawText = await requestGemini(apiKey, model, prompt, "application/json");
+
   const parsed = lessonSchema.parse(JSON.parse(extractJson(rawText)));
 
   return parsed;
@@ -149,4 +193,15 @@ export async function generateLessonWithGemini(input: GenerationInput, context: 
   }
 
   return secondAttempt;
+}
+
+export async function generateLessonHtmlWithGemini(
+  input: GenerationInput,
+  lesson: AiLessonContent,
+  context: LessonContext,
+): Promise<string> {
+  const { apiKey, model } = requireGeminiEnv();
+  const prompt = buildGeminiHtmlDeckPrompt(input, lesson, context);
+  const rawText = await requestGemini(apiKey, model, prompt, "text/plain");
+  return ensureHtmlDocument(extractHtml(rawText), lesson.title);
 }

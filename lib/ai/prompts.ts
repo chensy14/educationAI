@@ -161,3 +161,73 @@ Summarize the lesson and include common mistakes to avoid.
 Output should feel like a real concept-teaching classroom deck.
 `.trim();
 }
+
+export function buildGeminiHtmlDeckPrompt(input: GenerationInput, lesson: AiLessonContent, context: LessonContext) {
+  return `
+Create a single self-contained HTML document in Korean that looks like a classroom presentation deck.
+
+Topic:
+${input.unit}
+
+Audience:
+${input.grade} ${input.subject}
+
+Verified context:
+- Standard code: ${context.standardCode || "미상"}
+- Summary: ${context.summary || "없음"}
+
+Lesson title:
+${lesson.title}
+
+Lesson subtitle:
+${lesson.subtitle}
+
+Topic summary:
+${lesson.topicSummary}
+
+Learning goals:
+${joinList(lesson.goals)}
+
+Formative question titles:
+${joinList(lesson.questions.map((question) => question.title))}
+
+Common misconceptions:
+${joinList(lesson.misconceptions)}
+
+Teacher feedback points:
+${joinList(lesson.feedback)}
+
+Retry question titles:
+${joinList(lesson.retryQuestions.map((question) => question.title))}
+
+Rubric:
+${joinList(lesson.rubric)}
+
+Requirements:
+- Return ONLY HTML. No markdown fences. No explanation.
+- Create a complete HTML document with <!DOCTYPE html>, <html>, <head>, and <body>.
+- Put all CSS inside a <style> tag.
+- Do not use external libraries, fonts, or images.
+- Make it feel like a PPT-style deck with 7 slide sections.
+- Each slide should be a 16:9 card with strong visual hierarchy.
+- Use a clean, bold, classroom-friendly design.
+- Keep the text concise and readable on mobile and desktop.
+- Add a simple top navigation or sticky control area for quick slide jumping.
+- Use the lesson content above instead of inventing unrelated content.
+- Slides 1 to 4 should explain the concept.
+- Slide 5 should show guided formative questions.
+- Slide 6 should show retry questions and teacher feedback.
+- Slide 7 should summarize the lesson and rubric.
+
+Suggested slide order:
+1. Cover
+2. Topic summary
+3. Learning goals and key concept explanation
+4. How to understand or solve this topic
+5. Formative questions
+6. Retry questions + teacher feedback
+7. Wrap-up + rubric + misconceptions
+
+Make the HTML directly viewable in a browser and visually close to a presentation deck.
+`.trim();
+}

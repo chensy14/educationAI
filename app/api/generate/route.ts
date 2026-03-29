@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { generateLessonWithGemini } from "@/lib/ai/gemini";
+import { generateLessonHtmlWithGemini, generateLessonWithGemini } from "@/lib/ai/gemini";
 import { generateSlidesDeckWithSlidesGpt } from "@/lib/ai/slidesgpt";
 import type { AiLessonContent } from "@/lib/ai/types";
 import { type Difficulty, type Purpose } from "@/lib/lesson-generator";
@@ -38,6 +38,7 @@ export async function POST(request: Request) {
     const context = await getLessonContext(parsed.grade, parsed.subject, parsed.unit);
 
     const lessonContent: AiLessonContent = await generateLessonWithGemini(parsed, context);
+    const htmlContent = await generateLessonHtmlWithGemini(parsed, lessonContent, context);
     const markdown = buildMarkdown(parsed, lessonContent);
     const slides = await generateSlidesDeckWithSlidesGpt(parsed, lessonContent, context);
     const pptxBuffer = slides.buffer;
@@ -90,6 +91,8 @@ export async function POST(request: Request) {
         rubric: lessonContent.rubric,
       },
       files: {
+        htmlFileName: `${fileStem}.html`,
+        htmlContent,
         markdown: markdown,
         pptxFileName: `${fileStem}.pptx`,
         pptxBase64: pptxBuffer.toString("base64"),

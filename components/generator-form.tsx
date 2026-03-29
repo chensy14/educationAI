@@ -34,6 +34,8 @@ type GenerateResponse = {
   };
   lesson: Lesson;
   files: {
+    htmlFileName: string;
+    htmlContent: string;
     markdown: string;
     pptxFileName: string;
     pptxBase64: string;
@@ -67,6 +69,25 @@ function downloadPptx(filename: string, base64: string) {
   link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+function openHtmlPreview(filename: string, html: string) {
+  const blob = new Blob([html], {
+    type: "text/html;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const opened = window.open(url, "_blank", "noopener,noreferrer");
+
+  if (!opened) {
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.download = filename;
+    link.click();
+  }
+
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
 export function GeneratorForm() {
@@ -257,10 +278,16 @@ export function GeneratorForm() {
               <div className="button-row">
                 <button
                   type="button"
-                  className="secondary-button button-single"
                   onClick={() => downloadPptx(result.files.pptxFileName, result.files.pptxBase64)}
                 >
                   PPTX 다운로드
+                </button>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => openHtmlPreview(result.files.htmlFileName, result.files.htmlContent)}
+                >
+                  HTML 보기
                 </button>
               </div>
 
